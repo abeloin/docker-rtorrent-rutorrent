@@ -1,3 +1,4 @@
+* text=auto eol=lf
 /*.sh linguist-detectable=false
 /rootfs/** linguist-detectable=false
 /geoip2-rutorrent/** linguist-detectable=false
