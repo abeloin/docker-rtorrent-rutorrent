@@ -8,14 +8,23 @@ ARG RTORRENT_VERSION=v0.16.13
 
 ARG MKTORRENT_VERSION=v1.1
 
-ARG RUTORRENT_VERSION=v5.3.1
+ARG RUTORRENT_VERSION=v5.3.6
 ARG DUMPTORRENT_VERSION=v1.7.0
 
 ARG ALPINE_VERSION=3.23
 ARG ALPINE_S6_VERSION=${ALPINE_VERSION}-2.2.0.3
 
+ARG ALPINE_PHP_VERSION=85
 FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS src
-RUN apk --update --no-cache add curl git tar tree sed xz
+RUN apk --update --no-cache add \
+    curl \
+    git \
+    patch \
+    tar \
+    tree \
+    sed \
+    xz \
+    findutils
 WORKDIR /src
 
 FROM src AS src-cares
@@ -45,6 +54,10 @@ FROM src AS src-rutorrent
 RUN git init . && git remote add origin "https://github.com/Novik/ruTorrent.git"
 ARG RUTORRENT_VERSION
 RUN git fetch origin "${RUTORRENT_VERSION}" && git checkout -q FETCH_HEAD
+COPY patches/rutorrent /tmp/rutorrent-patches
+RUN if [ -d /tmp/rutorrent-patches ]; then \
+      find /tmp/rutorrent-patches -name "*.patch" -exec patch -p1 -i {} \;; \
+    fi
 RUN rm -rf .git* conf/users plugins/geoip share
 
 FROM composer:2 AS update-geoip2-rutorrent
@@ -78,6 +91,7 @@ RUN sed -i '1i #include <sys/time.h>' src/scrapec.c
 RUN rm -rf .git*
 
 FROM crazymax/alpine-s6:${ALPINE_S6_VERSION} AS builder
+ARG ALPINE_PHP_VERSION
 RUN apk --update --no-cache add \
     autoconf \
     automake \
@@ -96,12 +110,14 @@ RUN apk --update --no-cache add \
     nghttp2-dev \
     openssl-dev \
     pcre-dev \
-    php84-dev \
-    php84-pear \
+    php${ALPINE_PHP_VERSION}-dev \
+    php${ALPINE_PHP_VERSION}-pear \
     tar \
     tree \
     xz \
     zlib-dev
+RUN ln -s /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
+ && ln -s /usr/bin/php-config${ALPINE_PHP_VERSION} /usr/bin/php-config
 
 ENV DIST_PATH="/dist"
 
@@ -158,6 +174,7 @@ RUN cp build/dumptorrent build/scrapec ${DIST_PATH}/usr/local/bin
 RUN tree ${DIST_PATH}
 
 FROM crazymax/alpine-s6:${ALPINE_S6_VERSION}
+ARG ALPINE_PHP_VERSION
 COPY --from=builder /dist /
 COPY --from=src-rutorrent --chown=nobody:nogroup /src /var/www/rutorrent
 COPY --from=src-geoip2-rutorrent --chown=nobody:nogroup /src /var/www/rutorrent/plugins/geoip2
@@ -181,7 +198,8 @@ RUN echo "@314 http://dl-cdn.alpinelinux.org/alpine/v3.14/main" >> /etc/apk/repo
   && echo "@320 http://dl-cdn.alpinelinux.org/alpine/v3.20/main" >> /etc/apk/repositories \
   && apk --update --no-cache add unrar@314 dhclient@320
 
-RUN apk --update --no-cache add \
+RUN apk --update --no-cache upgrade \
+  && apk --no-cache add \
     apache2-utils \
     bash \
     bind-tools \
@@ -201,20 +219,20 @@ RUN apk --update --no-cache add \
     nginx-mod-http-dav-ext \
     nginx-mod-http-geoip2 \
     openssl \
-    php84 \
-    php84-bcmath \
-    php84-ctype \
-    php84-curl \
-    php84-dom \
-    php84-fileinfo \
-    php84-fpm \
-    php84-mbstring \
-    php84-openssl \
-    php84-posix \
-    php84-session \
-    php84-sockets \
-    php84-xml \
-    php84-zip \
+    php${ALPINE_PHP_VERSION} \
+    php${ALPINE_PHP_VERSION}-bcmath \
+    php${ALPINE_PHP_VERSION}-ctype \
+    php${ALPINE_PHP_VERSION}-curl \
+    php${ALPINE_PHP_VERSION}-dom \
+    php${ALPINE_PHP_VERSION}-fileinfo \
+    php${ALPINE_PHP_VERSION}-fpm \
+    php${ALPINE_PHP_VERSION}-mbstring \
+    php${ALPINE_PHP_VERSION}-openssl \
+    php${ALPINE_PHP_VERSION}-posix \
+    php${ALPINE_PHP_VERSION}-session \
+    php${ALPINE_PHP_VERSION}-sockets \
+    php${ALPINE_PHP_VERSION}-xml \
+    php${ALPINE_PHP_VERSION}-zip \
     python3 \
     py3-pip \
     shadow \
@@ -229,6 +247,7 @@ RUN apk --update --no-cache add \
   && addgroup -g ${PGID} rtorrent \
   && adduser -D -H -u ${PUID} -G rtorrent -s /bin/sh rtorrent \
   && curl --version \
+  && ln -s /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
   && rm -rf /tmp/*
 
 COPY rootfs /
