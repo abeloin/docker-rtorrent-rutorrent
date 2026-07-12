@@ -116,8 +116,10 @@ RUN apk --update --no-cache add \
     tree \
     xz \
     zlib-dev
-RUN ln -s /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
- && ln -s /usr/bin/php-config${ALPINE_PHP_VERSION} /usr/bin/php-config
+# php 8.5+ no longer ships the unversioned symlinks; force them so the build
+# works whether or not the package already created /usr/bin/php{,-config}.
+RUN ln -sf /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
+ && ln -sf /usr/bin/php-config${ALPINE_PHP_VERSION} /usr/bin/php-config
 
 ENV DIST_PATH="/dist"
 
@@ -248,7 +250,7 @@ RUN apk --update --no-cache upgrade \
   && addgroup -g ${PGID} rtorrent \
   && adduser -D -H -u ${PUID} -G rtorrent -s /bin/sh rtorrent \
   && curl --version \
-  && ln -s /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
+  && ln -sf /usr/bin/php${ALPINE_PHP_VERSION} /usr/bin/php \
   && rm -rf /tmp/*
 
 COPY rootfs /
