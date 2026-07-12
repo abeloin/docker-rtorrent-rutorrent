@@ -2,6 +2,12 @@ variable "DEFAULT_TAG" {
   default = "rtorrent-rutorrent:local"
 }
 
+// Alpine PHP version to build against (e.g. "84", "85").
+// Empty string falls back to the Dockerfile's ARG default.
+variable "ALPINE_PHP_VERSION" {
+  default = ""
+}
+
 // Special target: https://github.com/docker/metadata-action#bake-definition
 target "docker-metadata-action" {
   tags = ["${DEFAULT_TAG}"]
@@ -14,6 +20,10 @@ group "default" {
 
 target "image" {
   inherits = ["docker-metadata-action"]
+  args = {
+    // Only override the Dockerfile ARG default when a version is provided.
+    ALPINE_PHP_VERSION = notequal("", ALPINE_PHP_VERSION) ? ALPINE_PHP_VERSION : null
+  }
 }
 
 target "image-local" {
