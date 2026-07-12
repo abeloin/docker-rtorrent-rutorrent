@@ -78,18 +78,21 @@ echo "Setting PHP-FPM configuration..."
 sed -e "s/@MEMORY_LIMIT@/$MEMORY_LIMIT/g" \
   -e "s/@UPLOAD_MAX_SIZE@/$UPLOAD_MAX_SIZE/g" \
   -e "s/@CLEAR_ENV@/$CLEAR_ENV/g" \
-  /tpls/etc/php85/php-fpm.d/www.conf > /etc/php85/php-fpm.d/www.conf
+  /tpls/etc/php${PHP_VERSION}/php-fpm.d/www.conf > /etc/php${PHP_VERSION}/php-fpm.d/www.conf
 
 echo "Setting PHP INI configuration..."
-sed -i "s|memory_limit.*|memory_limit = ${MEMORY_LIMIT}|g" /etc/php85/php.ini
-sed -i "s|;date\.timezone.*|date\.timezone = ${TZ}|g" /etc/php85/php.ini
-sed -i "s|max_file_uploads.*|max_file_uploads = ${MAX_FILE_UPLOADS}|g" /etc/php85/php.ini
-sed -i "s|;*register_argc_argv.*|register_argc_argv = On|g" /etc/php85/php.ini
+sed -i "s|memory_limit.*|memory_limit = ${MEMORY_LIMIT}|g" /etc/php${PHP_VERSION}/php.ini
+sed -i "s|;date\.timezone.*|date\.timezone = ${TZ}|g" /etc/php${PHP_VERSION}/php.ini
+sed -i "s|max_file_uploads.*|max_file_uploads = ${MAX_FILE_UPLOADS}|g" /etc/php${PHP_VERSION}/php.ini
+# register_argc_argv defaults to Off in php-cli 8.5+; earlier versions leave it On already.
+if [ "${PHP_VERSION}" -ge 85 ]; then
+  sed -i "s|;*register_argc_argv.*|register_argc_argv = On|g" /etc/php${PHP_VERSION}/php.ini
+fi
 
 # OpCache
 echo "Setting OpCache configuration..."
 sed -e "s/@OPCACHE_MEM_SIZE@/$OPCACHE_MEM_SIZE/g" \
-  /tpls/etc/php85/conf.d/opcache.ini > /etc/php85/conf.d/opcache.ini
+  /tpls/etc/php${PHP_VERSION}/conf.d/opcache.ini > /etc/php${PHP_VERSION}/conf.d/opcache.ini
 
 # Nginx
 echo "Setting Nginx configuration..."
@@ -182,7 +185,8 @@ fi
 
 # rTorrent local config
 echo "Checking rTorrent local configuration..."
-sed -e "s!@RT_LOG_LEVEL@!$RT_LOG_LEVEL!g" \
+sed -e "s!@PHP_BIN@!/usr/bin/php${PHP_VERSION}!g" \
+  -e "s!@RT_LOG_LEVEL@!$RT_LOG_LEVEL!g" \
   -e "s!@RT_DHT_PORT@!$RT_DHT_PORT!g" \
   -e "s!@RT_INC_PORT@!$RT_INC_PORT!g" \
   -e "s!@XMLRPC_SIZE_LIMIT@!$XMLRPC_SIZE_LIMIT!g" \
