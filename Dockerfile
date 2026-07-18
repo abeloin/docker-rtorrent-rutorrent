@@ -14,9 +14,10 @@ ARG DUMPTORRENT_VERSION=v1.7.0
 ARG ALPINE_VERSION=3.23
 ARG ALPINE_S6_VERSION=${ALPINE_VERSION}-2.2.0.3
 
+ARG ALPINE_PHP_VERSION=85
+
 FROM tianon/gosu:latest AS gosu
 
-ARG ALPINE_PHP_VERSION=85
 FROM --platform=${BUILDPLATFORM} alpine:${ALPINE_VERSION} AS src
 RUN apk --update --no-cache add \
     curl \
@@ -178,6 +179,7 @@ RUN cp build/dumptorrent build/scrapec ${DIST_PATH}/usr/local/bin
 RUN tree ${DIST_PATH}
 
 FROM crazymax/alpine-s6:${ALPINE_S6_VERSION}
+ARG ALPINE_PHP_VERSION
 COPY --from=gosu /gosu /usr/local/bin/
 COPY --from=builder /dist /
 COPY --from=src-rutorrent --chown=nobody:nogroup /src /var/www/rutorrent
