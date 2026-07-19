@@ -95,7 +95,8 @@ RUN rm -rf .git*
 
 FROM crazymax/alpine-s6:${ALPINE_S6_VERSION} AS builder
 ARG ALPINE_PHP_VERSION
-RUN apk --update --no-cache add \
+RUN apk --update --no-cache upgrade && \
+    apk --no-cache add \
     autoconf \
     automake \
     binutils \
