@@ -66,7 +66,8 @@ RUN rm -rf .git* conf/users plugins/geoip share
 FROM composer:2 AS update-geoip2-rutorrent
 WORKDIR /app
 COPY geoip2-rutorrent/composer.json ./
-RUN composer update --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative
+RUN apk --update --no-cache upgrade && \
+  composer update --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative
 
 FROM scratch AS export-geoip2-rutorrent
 COPY --from=update-geoip2-rutorrent /app/composer.json /composer.json
@@ -76,7 +77,8 @@ COPY --from=update-geoip2-rutorrent /app/vendor /vendor
 FROM composer:2 AS vendor-geoip2-rutorrent
 WORKDIR /app
 COPY geoip2-rutorrent/composer.json geoip2-rutorrent/composer.lock ./
-RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative
+RUN apk --update --no-cache upgrade && \
+  composer install --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative
 
 FROM src AS src-geoip2-rutorrent
 COPY geoip2-rutorrent /src
