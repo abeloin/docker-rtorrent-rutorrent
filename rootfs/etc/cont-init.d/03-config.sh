@@ -219,6 +219,11 @@ cat > /var/www/rutorrent/conf/config.php <<EOL
 \$httpTimeOut = ${RU_HTTP_TIME_OUT};
 \$httpUseGzip = ${RU_HTTP_USE_GZIP};
 
+// Keep ruTorrent's private-network fetch guard disabled by default to avoid
+// breaking local indexers, feeds, and torrent link services.
+\$httpBlockPrivateNetworks = false;
+\$httpPrivateNetworkAllowlist = array();
+
 // for xmlrpc actions
 \$rpcTimeOut = ${RU_RPC_TIME_OUT};
 \$rpcLogCalls = ${RU_LOG_RPC_CALLS};
