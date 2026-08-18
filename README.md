@@ -140,7 +140,7 @@ linux/arm64
 * `RT_SESSION_FDATASYNC`: Force fdatasync when saving sessions (`system.files.session.fdatasync.set`, default `false`)
 * `RT_TRACKER_DELAY_SCRAPE`: Delay tracker announces at startup (default `true`)
 * `RT_DHT_PORT`: DHT UDP port (`dht.override_port.set`, default `6881`)
-* `RT_INC_PORT`: Incoming connections (`network.port_range.set`, default `50000`)
+* `RT_INC_PORT`: Incoming connections (`network.listen.port.range.set`, default `50000`)
 * `RT_SEND_BUFFER_SIZE`: Sets default tcp wmem value (`network.send_buffer.size.set`, default `4M`)
 * `RT_RECEIVE_BUFFER_SIZE`: Sets default tcp rmem value (`network.receive_buffer.size.set`, default `4M`)
 * `RT_PREALLOCATE_TYPE`: Sets the type of [disk space preallocation](#rtorrent-disk-space-preallocation) (default `0`)
@@ -183,7 +183,7 @@ linux/arm64
 * `8000` (or `XMLRPC_PORT`): XMLRPC port through nginx over SCGI socket
 * `8080` (or `RUTORRENT_PORT`): ruTorrent HTTP port
 * `9000` (or `WEBDAV_PORT`): WebDAV port on completed downloads
-* `50000` (or `RT_INC_PORT`): Incoming connections (`network.port_range.set`)
+* `50000` (or `RT_INC_PORT`): Incoming connections (`network.listen.port.range.set`)
 
 > [!WARNING]
 > Port p+1 defined for `XMLRPC_PORT`, `RUTORRENT_PORT` and `WEBDAV_PORT` will
@@ -289,7 +289,7 @@ properties of this file:
 * `session.path.set`: Default session directory (`cfg.session`)
 * PID file to `/var/run/rtorrent/rtorrent.pid`
 * `network.scgi.open_local`: SCGI local socket and make it group-writable and secure
-* `network.port_range.set`: Listening port for incoming peer traffic (`50000-50000`)
+* `network.listen.port.range.set`: Listening port for incoming peer traffic (`50000-50000`)
 * `dht.override_port.set`: UDP port to use for DHT (`6881`)
 * `log.open_file`: Default logging to `/data/rtorrent/log/rtorrent.log`
   * Log level can be modified with the environment variable `RT_LOG_LEVEL`
