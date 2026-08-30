@@ -20,6 +20,7 @@ EOL
 chmod +x /etc/services.d/php-fpm/run
 
 mkdir -p /etc/services.d/rtorrent
+echo 2 > /etc/services.d/rtorrent/down-signal
 cat > /etc/services.d/rtorrent/run <<EOL
 #!/usr/bin/execlineb -P
 with-contenv
