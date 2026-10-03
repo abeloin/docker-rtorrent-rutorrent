@@ -42,6 +42,8 @@ FROM src AS src-libtorrent
 RUN git init . && git remote add origin "https://github.com/rakshasa/libtorrent.git"
 ARG LIBTORRENT_VERSION
 RUN git fetch origin "${LIBTORRENT_VERSION}" && git checkout -q FETCH_HEAD
+COPY patches/libtorrent /tmp/libtorrent-patches
+RUN find /tmp/libtorrent-patches -name "*.patch" | sort | xargs -r -n1 patch -p1 -i
 
 FROM src AS src-rtorrent
 RUN git init . && git remote add origin "https://github.com/rakshasa/rtorrent.git"
@@ -58,9 +60,7 @@ RUN git init . && git remote add origin "https://github.com/Novik/ruTorrent.git"
 ARG RUTORRENT_VERSION
 RUN git fetch origin "${RUTORRENT_VERSION}" && git checkout -q FETCH_HEAD
 COPY patches/rutorrent /tmp/rutorrent-patches
-RUN if [ -d /tmp/rutorrent-patches ]; then \
-      find /tmp/rutorrent-patches -name "*.patch" -exec patch -p1 -i {} \;; \
-    fi
+RUN find /tmp/rutorrent-patches -name "*.patch" | sort | xargs -r -n1 patch -p1 -i
 RUN rm -rf .git* conf/users plugins/geoip share
 
 FROM composer:2 AS update-geoip2-rutorrent
