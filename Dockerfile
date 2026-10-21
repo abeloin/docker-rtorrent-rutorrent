@@ -3,16 +3,15 @@
 ARG CARES_VERSION=1.34.8
 ARG CURL_VERSION=8.22.0
 
-ARG LIBTORRENT_VERSION=v0.16.24
-ARG RTORRENT_VERSION=v0.16.24
+ARG LIBTORRENT_VERSION=v0.16.25
+ARG RTORRENT_VERSION=v0.16.25
 
 ARG MKTORRENT_VERSION=v1.1
 
-ARG RUTORRENT_VERSION=v5.3.15
+ARG RUTORRENT_VERSION=v5.3.16
 ARG DUMPTORRENT_VERSION=v1.7.0
 
 ARG ALPINE_VERSION=3.24
-ARG ALPINE_S6_VERSION=${ALPINE_VERSION}-2.2.0.3
 
 ARG ALPINE_PHP_VERSION=85
 
@@ -61,7 +60,7 @@ ARG RUTORRENT_VERSION
 RUN git fetch origin "${RUTORRENT_VERSION}" && git checkout -q FETCH_HEAD
 COPY patches/rutorrent /tmp/rutorrent-patches
 RUN find /tmp/rutorrent-patches -name "*.patch" | sort | xargs -r -n1 patch -p1 -i
-RUN rm -rf .git* conf/users plugins/geoip share
+RUN rm -rf .git* conf/users plugins/geoip share tests
 
 FROM composer:2 AS update-geoip2-rutorrent
 WORKDIR /app
@@ -95,7 +94,7 @@ RUN git fetch origin "${DUMPTORRENT_VERSION}" && git checkout -q FETCH_HEAD
 RUN sed -i '1i #include <sys/time.h>' src/scrapec.c
 RUN rm -rf .git*
 
-FROM crazymax/alpine-s6:${ALPINE_S6_VERSION} AS builder
+FROM alpine:${ALPINE_VERSION} AS builder
 ARG ALPINE_PHP_VERSION
 RUN apk --update --no-cache upgrade && \
     apk --no-cache add \
@@ -181,7 +180,7 @@ RUN cmake --build build/ --config Release --parallel $(nproc)
 RUN cp build/dumptorrent build/scrapec ${DIST_PATH}/usr/local/bin
 RUN tree ${DIST_PATH}
 
-FROM crazymax/alpine-s6:${ALPINE_S6_VERSION}
+FROM alpine:${ALPINE_VERSION}
 ARG ALPINE_PHP_VERSION
 COPY --from=gosu /gosu /usr/local/bin/
 COPY --from=builder /dist /
@@ -192,7 +191,7 @@ COPY --from=src-mmdb /src /var/mmdb
 ENV PHP_VERSION="${ALPINE_PHP_VERSION}" \
   PYTHONPATH="/var/www/rutorrent" \
   S6_BEHAVIOUR_IF_STAGE2_FAILS="2" \
-  S6_KILL_GRACETIME="10000" \
+  S6_STAGE2_HOOK="/etc/s6-overlay/scripts/runtime-bundles" \
   TZ="UTC" \
   PUID="1000" \
   PGID="1000"
@@ -202,11 +201,10 @@ RUN echo "net.core.rmem_max = 67108864" >> /etc/sysctl.conf \
   && echo "net.core.wmem_max = 67108864" >> /etc/sysctl.conf \
   && sysctl -p
 
-# unrar package is not available since alpine 3.15
-# dhclient package is not available since alpine 3.21
+# ruTorrent's unpack plugin requires unrar, which Alpine removed in 3.15.
+# Use the last Alpine release that packaged it until a replacement is available.
 RUN echo "@314 http://dl-cdn.alpinelinux.org/alpine/v3.14/main" >> /etc/apk/repositories \
-  && echo "@320 http://dl-cdn.alpinelinux.org/alpine/v3.20/main" >> /etc/apk/repositories \
-  && apk --update --no-cache add unrar@314 dhclient@320
+  && apk --update --no-cache add unrar@314
 
 RUN apk --update --no-cache upgrade \
   && apk --no-cache add \
@@ -246,6 +244,7 @@ RUN apk --update --no-cache upgrade \
     php${ALPINE_PHP_VERSION}-zip \
     python3 \
     py3-pip \
+    s6-overlay \
     shadow \
     sox \
     tar \

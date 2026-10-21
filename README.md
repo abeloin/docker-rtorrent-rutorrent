@@ -152,6 +152,7 @@ linux/arm64
 * `RU_HTTP_USER_AGENT`: ruTorrent HTTP user agent (default `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36`)
 * `RU_HTTP_TIME_OUT`: ruTorrent HTTP timeout in seconds (default `30`)
 * `RU_HTTP_USE_GZIP`: Use HTTP Gzip compression (default `true`)
+* `RU_HTTP_VERIFY_CERTIFICATES`: Verify HTTPS server and proxy certificates (default `true`)
 * `RU_RPC_TIME_OUT`: ruTorrent RPC timeout in seconds (default `5`)
 * `RU_LOG_RPC_CALLS`: Log ruTorrent RPC calls (default `false`)
 * `RU_LOG_RPC_FAULTS`: Log ruTorrent RPC faults (default `true`)
@@ -330,6 +331,10 @@ $partitionDirectory = null;	// if null, then we will check rtorrent download dir
 > Container has to be restarted to propagate changes
 
 ### Increase Docker timeout to allow rTorrent to shutdown gracefully
+
+The image uses native s6-overlay v3 services. During shutdown, rTorrent receives
+SIGINT so it can save its session and notify trackers before exiting. Allow
+enough time for this work using Docker's stop timeout.
 
 After issuing a shutdown command, Docker waits 10 seconds for the container to
 exit before it is killed.  If you are a seeding many torrents, rTorrent may be
