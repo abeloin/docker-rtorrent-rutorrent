@@ -134,7 +134,6 @@ linux/arm64
 
 ### rTorrent
 
-* `RT_LOG_LEVEL`: rTorrent log level (default `info`)
 * `RT_LOG_EXECUTE`: Log executed commands to `/data/rtorrent/log/execute.log` (default `false`)
 * `RT_LOG_XMLRPC`: Log XMLRPC queries to `/data/rtorrent/log/xmlrpc.log` (default `false`)
 * `RT_SESSION_SAVE_SECONDS`: Seconds between writing torrent information to disk (default `3600`)
@@ -295,8 +294,7 @@ properties of this file:
 * `network.listen.port.range.set`: Listening port for incoming peer traffic (`50000-50000`)
 * `dht.override_port.set`: UDP port to use for DHT (`6881`)
 * `log.open_file`: Default logging to `/data/rtorrent/log/rtorrent.log`
-  * Log level can be modified with the environment variable `RT_LOG_LEVEL`
-  * `rpc_events` are logged be default
+  * `errors`, `events`, `torrent_events` and `rpc_events` are logged by default
   * To log executed commands, add the environment variable `RT_LOG_EXECUTE`
   * To log XMLRPC queries, add the environment variable `RT_LOG_XMLRPC`
 

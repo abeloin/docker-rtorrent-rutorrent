@@ -62,10 +62,12 @@ system.file.allocate.set = @RT_PREALLOCATE_TYPE@
 system.files.session.fdatasync.set = @RT_SESSION_FDATASYNC@
 
 # Logging
-## levels = critical error warn notice info debug
-## groups = connection_* dht_* peer_* rpc_* storage_* thread_* tracker_* torrent_*
+## general = errors events debug_trace (non-cascading since libtorrent v0.16.26)
+## groups = connection_* dht_* net_* peer_* protocol_* rpc_* session_* storage_* system_* torrent_* tracker_*
 log.open_file = "log",(cat,(cfg.logs),"rtorrent.log")
-log.add_output = "@RT_LOG_LEVEL@","log"
+log.add_output = "errors","log"
+log.add_output = "events","log"
+log.add_output = "torrent_events","log"
 log.add_output = "rpc_events","log"
 #log.execute = (cat,(cfg.logs),"execute.log")
 #log.rpc = (cat,(cfg.logs),"xmlrpc.log")

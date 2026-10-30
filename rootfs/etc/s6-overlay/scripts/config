@@ -21,7 +21,6 @@ XMLRPC_AUTHBASIC_STRING=${XMLRPC_AUTHBASIC_STRING:-rTorrent XMLRPC restricted ac
 RUTORRENT_AUTHBASIC_STRING=${RUTORRENT_AUTHBASIC_STRING:-ruTorrent restricted access}
 WEBDAV_AUTHBASIC_STRING=${WEBDAV_AUTHBASIC_STRING:-WebDAV restricted access}
 
-RT_LOG_LEVEL=${RT_LOG_LEVEL:-info}
 RT_LOG_EXECUTE=${RT_LOG_EXECUTE:-false}
 RT_LOG_XMLRPC=${RT_LOG_XMLRPC:-false}
 RT_SESSION_SAVE_SECONDS=${RT_SESSION_SAVE_SECONDS:-3600}
@@ -189,7 +188,6 @@ fi
 # rTorrent local config
 echo "Checking rTorrent local configuration..."
 sed -e "s!@PHP_BIN@!/usr/bin/php${PHP_VERSION}!g" \
-  -e "s!@RT_LOG_LEVEL@!$RT_LOG_LEVEL!g" \
   -e "s!@RT_DHT_PORT@!$RT_DHT_PORT!g" \
   -e "s!@RT_INC_PORT@!$RT_INC_PORT!g" \
   -e "s!@XMLRPC_SIZE_LIMIT@!$XMLRPC_SIZE_LIMIT!g" \
